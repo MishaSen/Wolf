@@ -5,7 +5,9 @@
 
 #include "ActorState.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/PrimitiveComponent.h"
 
 // Sets default values for this component's properties
 UPresageManager::UPresageManager()
@@ -31,7 +33,6 @@ void UPresageManager::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 void UPresageManager::CaptureCharacterStates()
@@ -40,7 +41,6 @@ void UPresageManager::CaptureCharacterStates()
 
 	TArray<AActor*> Characters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), Characters);
-
 	for (AActor* Actor : Characters)
 	{
 		ACharacter* Char = Cast<ACharacter>(Actor);
@@ -51,8 +51,52 @@ void UPresageManager::CaptureCharacterStates()
 		NewState.Location = Char->GetActorLocation();
 		NewState.Rotation = Char->GetActorRotation();
 		NewState.Velocity = Char->GetVelocity();
+		NewState.MovementMode = Char->GetCharacterMovement()->MovementMode;
+		NewState.CustomMovementMode = Char->GetCharacterMovement()->CustomMovementMode;
 
 		OriginalCharacterStates.Add(NewState);
 	}
 }
 
+void UPresageManager::RevertCharacterStates()
+{
+	TArray<AActor*> Characters;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), Characters);
+	for (AActor* Actor : Characters)
+	{
+		ACharacter* Char = Cast<ACharacter>(Actor);
+		if (!Char) continue;
+
+		//Find saved state with matching ActorRef
+		const FActorState* FoundState = OriginalCharacterStates.FindByPredicate([Char](const FActorState& State)
+		{
+			return State.ActorRef == Char;
+		});
+		if (!FoundState) continue;
+
+		// Send Character back to saved original position
+		Char->SetActorLocationAndRotation(
+			FoundState->Location,
+			FoundState->Rotation,
+			false,
+			nullptr,
+			ETeleportType::TeleportPhysics);
+
+		// Set movement velocity and mode
+		if (UCharacterMovementComponent* MoveComp = Char->GetCharacterMovement())
+		{
+			MoveComp->SetMovementMode(FoundState->MovementMode, FoundState->CustomMovementMode);
+			MoveComp->Velocity = FoundState->Velocity;
+			MoveComp->UpdateComponentVelocity();
+		}
+
+		// If Character simulates physics, set physics velocity
+		if (UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(Char->GetRootComponent()))
+		{
+			if (PrimComp->IsSimulatingPhysics())
+			{
+				PrimComp->SetPhysicsLinearVelocity(FoundState->Velocity);
+			}
+		}
+	}
+}

@@ -28,6 +28,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Presage")
 	TArray<FActorState> OriginalCharacterStates;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Presage", meta=(ClampMin = "0.0", UIMin = "0.0"))
+	float FlowTime = 3.f;
+
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void CaptureCharacterStates();
+
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void RevertCharacterStates();
 };

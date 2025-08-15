@@ -5,6 +5,10 @@
 #include "CoreMinimal.h"
 #include "ActorState.generated.h"
 
+class AActor;
+class UAnimSequence;
+class UAnimMontage;
+
 USTRUCT(BlueprintType)
 struct FActorState
 {
@@ -22,6 +26,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
 	FVector Velocity = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
+	TEnumAsByte<EMovementMode> MovementMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
+	uint8 CustomMovementMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
 	UAnimSequence* CurrentSequence = nullptr;
