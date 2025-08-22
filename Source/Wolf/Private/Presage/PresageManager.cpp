@@ -3,11 +3,12 @@
 
 #include "Presage/PresageManager.h"
 
-#include "ActorState.h"
+#include "Wolf/Public/Presage/ActorState.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
+#include "TimerManager.h"
 
 // Sets default values for this component's properties
 UPresageManager::UPresageManager()
@@ -54,6 +55,15 @@ void UPresageManager::CaptureCharacterStates()
 		NewState.MovementMode = Char->GetCharacterMovement()->MovementMode;
 		NewState.CustomMovementMode = Char->GetCharacterMovement()->CustomMovementMode;
 
+		if (UAnimInstance* AInst = Char->GetMesh()->GetAnimInstance())
+		{
+			if (UAnimMontage* Mon = AInst->GetCurrentActiveMontage())
+			{
+				NewState.CurrentMontage = Mon;
+				NewState.MontagePosition = AInst->Montage_GetPosition(Mon);
+			}
+		}
+
 		OriginalCharacterStates.Add(NewState);
 	}
 }
@@ -98,5 +108,55 @@ void UPresageManager::RevertCharacterStates()
 				PrimComp->SetPhysicsLinearVelocity(FoundState->Velocity);
 			}
 		}
+
+		// Revert to original animation
+		if (UAnimInstance* AInst = Char->GetMesh()->GetAnimInstance())
+		{
+			AInst->StopAllMontages(0.f);
+			if (FoundState->CurrentMontage.IsValid())
+			{
+				AInst->Montage_Play(FoundState->CurrentMontage.Get(), 1.f);
+				AInst->Montage_SetPosition(FoundState->CurrentMontage.Get(), FoundState->MontagePosition);
+			}
+		}
 	}
+}
+
+void UPresageManager::StartLoop()
+{
+	// In case we ever happen to have multiple timers going somehow
+	if (GetWorld()->GetTimerManager().IsTimerActive(FlowTimerHandle))
+	{
+		return;
+	}
+	
+	CaptureCharacterStates();
+	GetWorld()->GetTimerManager().SetTimer(
+		FlowTimerHandle,
+		this,
+		&UPresageManager::OnFlowTimerTick,
+		FlowTime,
+		true);
+}
+
+void UPresageManager::StopLoop()
+{
+	GetWorld()->GetTimerManager().ClearTimer(FlowTimerHandle);
+	RevertCharacterStates();
+}
+
+void UPresageManager::PauseLoop()
+{
+	GetWorld()->GetTimerManager().PauseTimer(FlowTimerHandle);
+}
+
+void UPresageManager::ResumeLoop()
+{
+	GetWorld()->GetTimerManager().UnPauseTimer(FlowTimerHandle);
+}
+
+void UPresageManager::OnFlowTimerTick()
+{
+	RevertCharacterStates();
+	CaptureCharacterStates();
 }

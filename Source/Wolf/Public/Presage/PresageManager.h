@@ -31,9 +31,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Presage", meta=(ClampMin = "0.0", UIMin = "0.0"))
 	float FlowTime = 3.f;
 
+	FTimerHandle FlowTimerHandle;
+
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void CaptureCharacterStates();
 
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void RevertCharacterStates();
+	
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void StartLoop();
+
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void StopLoop();
+
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void PauseLoop();
+
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void ResumeLoop();
+
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void OnFlowTimerTick();
 };

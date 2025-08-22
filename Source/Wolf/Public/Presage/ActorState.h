@@ -34,11 +34,8 @@ public:
 	uint8 CustomMovementMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
-	UAnimSequence* CurrentSequence = nullptr;
+	TWeakObjectPtr<UAnimMontage> CurrentMontage = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
-	UAnimMontage* CurrentMontage = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ActorState")
-	float AnimationTime = 0.0f;
+	float MontagePosition = 0.0f;
 };
