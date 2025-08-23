@@ -6,31 +6,34 @@
 #include "AbilitySystem/WolfAbilitySystemComponent.h"
 #include "AbilitySystem/WolfAttributeSet.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
 #include "WolfCharacter.generated.h"
 
 UCLASS()
-class WOLF_API AWolfCharacter : public ACharacter
+class WOLF_API AWolfCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AWolfCharacter();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UWolfAbilitySystemComponent* ASC;
 
 	UPROPERTY()
 	UWolfAttributeSet* AtSet;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+	TSubclassOf<UGameplayEffect> DefaultAttributes;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;	
 };

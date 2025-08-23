@@ -24,7 +24,7 @@ void UTBCombatAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
-	
+
 	// Cache context for use in OnDelayFinished()
 	CachedHandle = Handle;
 	CachedActorInfo = ActorInfo;
@@ -49,27 +49,29 @@ void UTBCombatAbility::PlayCurrentPeriod(FGameplayAbilitySpecHandle Handle,
 	if (const UEnum* EnumPtr = StaticEnum<EPeriod>()) //
 	{
 		UE_LOG(LogTemp, Log,
-			   TEXT("Current Period: %s | Duration: %.2f | Invulnerability: %s"),
-			   *EnumPtr->GetNameStringByValue(static_cast<uint64>(Period.PeriodType)).RightChop(FString("EPeriod::").Len()),
-			   Period.Duration,
-			   Period.bIsInvulnerable ? TEXT("true") : TEXT("false"));
+		       TEXT("Current Period: %s | Duration: %.2f | Invulnerability: %s"),
+		       *EnumPtr->GetNameStringByValue(static_cast<uint64>(Period.PeriodType)).RightChop(FString("EPeriod::").Len
+			       ()),
+		       Period.Duration,
+		       Period.bIsInvulnerable ? TEXT("true") : TEXT("false"));
 	}
 
 	if (Period.Montage)
 	{
 		UAbilityTask_PlayMontageAndWait* MontageTask =
-			UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,
-																		   NAME_None,
-																		   Period.Montage,
-																		   1.f);
-		MontageTask->OnCompleted.AddDynamic(this, &UTBCombatAbility::K2_EndAbility);
+			UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
+				this,
+				NAME_None,
+				Period.Montage,
+				1.f
+			);
+		MontageTask->OnCompleted.AddDynamic(this, &UTBCombatAbility::OnDelayFinished);
 		MontageTask->OnInterrupted.AddDynamic(this, &UTBCombatAbility::K2_EndAbility);
 		MontageTask->OnCancelled.AddDynamic(this, &UTBCombatAbility::K2_EndAbility);
 
 		MontageTask->ReadyForActivation();
 	}
-
-	if (Period.Duration > 0.f)
+	else if (Period.Duration > 0.f)
 	{
 		UAbilityTask_WaitDelay* DelayTask = UAbilityTask_WaitDelay::WaitDelay(this, Period.Duration);
 		DelayTask->OnFinish.AddDynamic(this, &UTBCombatAbility::OnDelayFinished);
@@ -88,5 +90,3 @@ void UTBCombatAbility::OnDelayFinished()
 	++CurrentPeriodIndex;
 	PlayCurrentPeriod(CachedHandle, CachedActorInfo, CachedActivationInfo);
 }
-
-
