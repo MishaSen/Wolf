@@ -6,20 +6,24 @@
 #include "Components/ActorComponent.h"
 #include "PresageManager.generated.h"
 
-
+class UGameplayAbility;
+struct FGameplayAbilitySpecHandle;
+class UAbilitySystemComponent;
 struct FActorState;
+struct FPresageAbilityRequest;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class WOLF_API UPresageManager : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UPresageManager();
 
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	// Called when the game starts
@@ -31,6 +35,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Presage", meta=(ClampMin = "0.0", UIMin = "0.0"))
 	float FlowTime = 3.f;
 
+	UPROPERTY()
+	TArray<FPresageAbilityRequest> AbilityQueue;
+
 	FTimerHandle FlowTimerHandle;
 
 	UFUNCTION(BlueprintCallable, Category = "Presage")
@@ -38,7 +45,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void RevertCharacterStates();
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void StartLoop();
 
@@ -53,4 +60,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void OnFlowTimerTick();
+
+	UFUNCTION(BlueprintCallable, Category = "Presage")
+	void QueueAbilityRequest(UAbilitySystemComponent* ASC, FGameplayAbilitySpecHandle SpecHandle, float DesiredTime, TSubclassOf<UGameplayAbility> AbilityClass);
 };

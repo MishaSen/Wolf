@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	void QueueAbility(FGameplayAbilitySpecHandle SpecHandle, float ScheduledTime);
+
 protected:
 	virtual void BeginPlay() override;
 };

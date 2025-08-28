@@ -3,6 +3,9 @@
 
 #include "Character/WolfCharacter.h"
 
+#include "Presage/PresageAbilityRequest.h"
+#include "Presage/PresageSubsystem.h"
+
 // Sets default values
 AWolfCharacter::AWolfCharacter()
 {
@@ -15,8 +18,34 @@ AWolfCharacter::AWolfCharacter()
 	 * 
 	 * ASC = CreateDefaultSubobject<UWolfAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	 * ASC->SetIsReplicated(true);
-	 * ASC->SetReplicationMode(EGameplayEffect ReplciationMode::Mixed);
+	 * ASC->SetReplicationMode(EGameplayEffect ReplicationMode::Mixed);
 	 */
+}
+
+void AWolfCharacter::QueueAbility(FGameplayAbilitySpecHandle SpecHandle, float ScheduledTime)
+{
+	if (!ASC) return;
+
+	// Get ability spec from handle
+	const FGameplayAbilitySpec* Spec = ASC->FindAbilitySpecFromHandle(SpecHandle);
+	if (!Spec || !Spec->Ability)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid Ability or Spec Handle"));
+		return;
+	}
+	const FPresageAbilityRequest Request(ASC, SpecHandle, ScheduledTime);
+
+	// Send Request to PresageSubsystem
+	if (UWorld* World = GetWorld())
+	{
+		if (UPresageSubsystem* Presage = UPresageSubsystem::Get(World))
+		{
+			Presage->QueueAbilityRequest(Request);
+			UE_LOG(LogTemp, Log, TEXT("Queued ability at %s at time %f"),
+				*Spec->Ability.GetClass()->GetName(),
+				ScheduledTime)
+		}
+	}
 }
 
 // Called when the game starts or when spawned

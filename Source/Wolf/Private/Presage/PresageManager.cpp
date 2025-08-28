@@ -9,6 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
 #include "TimerManager.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Presage/PresageAbilityRequest.h"
 
 // Sets default values for this component's properties
 UPresageManager::UPresageManager()
@@ -158,5 +161,10 @@ void UPresageManager::ResumeLoop()
 void UPresageManager::OnFlowTimerTick()
 {
 	RevertCharacterStates();
-	CaptureCharacterStates();
+}
+
+void UPresageManager::QueueAbilityRequest(UAbilitySystemComponent* ASC,
+	const FGameplayAbilitySpecHandle SpecHandle, const float DesiredTime, const TSubclassOf<UGameplayAbility> AbilityClass)
+{
+	AbilityQueue.Add(FPresageAbilityRequest(ASC, SpecHandle, DesiredTime));
 }
