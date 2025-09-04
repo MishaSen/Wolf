@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
+#include "InputAction.h"
 #include "WolfInputConfig.generated.h"
 
 USTRUCT(BlueprintType)
