@@ -23,13 +23,17 @@ struct FPresageAbilityRequest
 
 	UPROPERTY()
 	float ScheduledTime = 0.f;
+
+	UPROPERTY()
+	FGameplayTag AbilityTag;
 	
 	FPresageAbilityRequest() {}
 
 	FPresageAbilityRequest(
 		UAbilitySystemComponent* InASC,
 		const FGameplayAbilitySpecHandle InSpecHandle,
-		const float InScheduledTime)
-		: OwnerASC(InASC), SpecHandle(InSpecHandle), ScheduledTime(InScheduledTime)
+		const float InScheduledTime,
+		const FGameplayTag& InTag)
+		: OwnerASC(InASC), SpecHandle(InSpecHandle), ScheduledTime(InScheduledTime), AbilityTag(InTag)
 	{}
 };

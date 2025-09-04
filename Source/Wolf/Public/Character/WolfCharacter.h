@@ -16,26 +16,35 @@ class WOLF_API AWolfCharacter : public ACharacter, public IAbilitySystemInterfac
 
 public:
 	AWolfCharacter();
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UFUNCTION(BlueprintPure, Category = "Abilities")
+	FGameplayAbilitySpecHandle GetAbilitySpecHandle(const TSubclassOf<UGameplayAbility>& AbilityClass) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	void QueueAbility(const FGameplayAbilitySpecHandle SpecHandle,
+	                  const float ScheduledTime,
+	                  const FGameplayTag AbilityTag);
+
+protected:
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PossessedBy(AController* NewController) override;
 
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UWolfAbilitySystemComponent* ASC;
-
-	UPROPERTY()
-	UWolfAttributeSet* AtSet;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
 	TSubclassOf<UGameplayEffect> DefaultAttributes;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+private:
+	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 
-	UFUNCTION(BlueprintCallable, Category = "Abilities")
-	void QueueAbility(FGameplayAbilitySpecHandle SpecHandle, float ScheduledTime);
+	UPROPERTY()
+	UWolfAttributeSet* AtSet;
 
-protected:
-	virtual void BeginPlay() override;
+	UPROPERTY()
+	TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle> GrantedAbilityHandles;
 };

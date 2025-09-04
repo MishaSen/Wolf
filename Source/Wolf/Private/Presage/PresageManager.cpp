@@ -166,5 +166,5 @@ void UPresageManager::OnFlowTimerTick()
 void UPresageManager::QueueAbilityRequest(UAbilitySystemComponent* ASC,
 	const FGameplayAbilitySpecHandle SpecHandle, const float DesiredTime, const TSubclassOf<UGameplayAbility> AbilityClass)
 {
-	AbilityQueue.Add(FPresageAbilityRequest(ASC, SpecHandle, DesiredTime));
+	
 }
