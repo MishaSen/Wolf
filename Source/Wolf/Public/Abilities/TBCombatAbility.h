@@ -19,6 +19,10 @@ USTRUCT(BlueprintType)
 struct FAttackPoint
 {
 	GENERATED_BODY()
+	FAttackPoint()
+		: Time(0.0f)
+		, Damage(0.0f)
+	{}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Time;
@@ -31,6 +35,13 @@ USTRUCT(BlueprintType)
 struct FPeriod
 {
 	GENERATED_BODY()
+	FPeriod()
+		: PeriodType(EPeriod::MoveTo)
+		, Duration(0.0f)
+		, bIsInvulnerable(false)
+		, AttackPoints()
+		, Montage(nullptr)
+	{}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPeriod PeriodType;
@@ -45,7 +56,7 @@ struct FPeriod
 	TArray<FAttackPoint> AttackPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* Montage;
+	TObjectPtr<UAnimMontage> Montage;
 };
 
 /**
