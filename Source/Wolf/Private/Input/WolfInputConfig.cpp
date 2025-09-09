@@ -6,11 +6,11 @@
 const UInputAction* UWolfInputConfig::FindAbilityInputActionForTag(const FGameplayTag& Tag,
                                                                    const bool bLogNotFound) const
 {
-	for (const FTaggedInputAction& Action : InputActions)
+	for (const auto& [InputAction, InputTag] : InputActions)
 	{
-		if (Action.InputAction && Action.InputTag.MatchesTagExact(Tag))
+		if (InputAction && InputTag.MatchesTagExact(Tag))
 		{
-			return Action.InputAction;
+			return InputAction;
 		}
 	}
 

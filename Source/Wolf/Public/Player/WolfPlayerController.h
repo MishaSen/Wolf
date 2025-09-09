@@ -77,5 +77,5 @@ private:
 	// --- Ability System ---
 	UPROPERTY()
 	TObjectPtr<UWolfAbilitySystemComponent> WolfASC;
-	UWolfAbilitySystemComponent* GetASC() const;
+	UWolfAbilitySystemComponent* GetASC();
 };

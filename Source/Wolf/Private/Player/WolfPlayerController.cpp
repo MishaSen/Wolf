@@ -3,8 +3,11 @@
 
 #include "Player/WolfPlayerController.h"
 #include "EnhancedInputSubsystems.h"
+#include "AbilitySystem/WolfAbilitySystemComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Input/WolfInputComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameFramework/Character.h"
 
 AWolfPlayerController::AWolfPlayerController()
 {
@@ -76,12 +79,36 @@ void AWolfPlayerController::UpdateInputContext(const EInputContext NewInputConte
 
 void AWolfPlayerController::AbilityInputTagPressed(const FGameplayTag InputTag)
 {
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagPressed(InputTag);
+	}
 }
 
 void AWolfPlayerController::AbilityInputTagReleased(const FGameplayTag InputTag)
 {
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagReleased(InputTag);
+	}
 }
 
 void AWolfPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 {
+	if (GetASC())
+	{
+		GetASC()->AbilityInputTagHeld(InputTag);
+	}
+}
+
+UWolfAbilitySystemComponent* AWolfPlayerController::GetASC()
+{
+	if (WolfASC == nullptr)
+	{
+		if (ACharacter* ControlledCharacter = GetCharacter())
+		{
+			WolfASC = Cast<UWolfAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(ControlledCharacter));
+		}
+	}
+	return WolfASC;
 }

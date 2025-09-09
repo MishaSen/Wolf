@@ -21,3 +21,55 @@ void UWolfAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 		}
 	}
 }
+
+void UWolfAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Tag)
+{
+	if (!Tag.IsValid()) return;
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(Tag))
+		{
+			AbilitySpecInputPressed(AbilitySpec);
+			if (AbilitySpec.IsActive())
+			{
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed,
+				                      AbilitySpec.Handle,
+				                      AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+			}
+		}
+	}
+}
+
+void UWolfAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& Tag)
+{
+	if (!Tag.IsValid()) return;
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(Tag) && AbilitySpec.IsActive())
+		{
+			AbilitySpecInputReleased(AbilitySpec);
+			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased,
+								  AbilitySpec.Handle,
+								  AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+		}
+	}
+}
+
+void UWolfAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& Tag)
+{
+	if (!Tag.IsValid()) return;
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if (AbilitySpec.DynamicAbilityTags.HasTagExact(Tag))
+		{
+			AbilitySpecInputPressed(AbilitySpec);
+			if (!AbilitySpec.IsActive())
+			{
+				TryActivateAbility(AbilitySpec.Handle);
+			}
+		}
+	}
+}
