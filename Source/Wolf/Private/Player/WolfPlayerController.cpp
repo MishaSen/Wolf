@@ -8,6 +8,7 @@
 #include "Input/WolfInputComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
+#include "Presage/PresageSubsystem.h"
 
 AWolfPlayerController::AWolfPlayerController()
 {
@@ -21,8 +22,12 @@ void AWolfPlayerController::PlayerTick(float DeltaTime)
 void AWolfPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdateInputContext(EInputContext::InCombatRT);
 
-	UpdateInputContext(EInputContext::OutOfCombat);
+	if (UPresageSubsystem* PresageSubsystem = UPresageSubsystem::Get(GetWorld()))
+	{
+		PresageSubsystem->OnTransitionToTB.AddDynamic(this, &AWolfPlayerController::HandleTBTransition);
+	}
 }
 
 void AWolfPlayerController::SetupInputComponent()
@@ -99,6 +104,12 @@ void AWolfPlayerController::AbilityInputTagHeld(const FGameplayTag InputTag)
 	{
 		GetASC()->AbilityInputTagHeld(InputTag);
 	}
+}
+
+void AWolfPlayerController::HandleTBTransition(bool bIsEnteringTB)
+{
+	const EInputContext NewInputContext = bIsEnteringTB ? EInputContext::InCombatTB : EInputContext::InCombatRT;
+	UpdateInputContext(NewInputContext);
 }
 
 UWolfAbilitySystemComponent* AWolfPlayerController::GetASC()

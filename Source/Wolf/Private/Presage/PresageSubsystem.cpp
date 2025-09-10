@@ -75,6 +75,8 @@ void UPresageSubsystem::StartLoop()
 	bLoopActive = true;
 	AccumulatedTime = 0.f;
 	CaptureCharacterStates();
+	OnTransitionToTB.Broadcast(true);
+	OnTransitionToRT.Broadcast(false);
 }
 
 void UPresageSubsystem::StopLoop()
@@ -86,6 +88,8 @@ void UPresageSubsystem::StopLoop()
 
 	bLoopActive = false;
 	AccumulatedTime = 0.f;
+	OnTransitionToTB.Broadcast(false);
+	OnTransitionToRT.Broadcast(true);
 }
 
 void UPresageSubsystem::OnFlowTimerTick()

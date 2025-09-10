@@ -6,6 +6,9 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "PresageSubsystem.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransitionToTB, bool, bIsEnteringTB);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransitionToRT, bool, bIsEnteringRT);
+
 struct FPresageAbilityRequest;
 struct FActorState;
 struct FGameplayAbilitySpecHandle;
@@ -40,6 +43,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Presage")
 	void StopLoop();
+
+	// -- Delegate Broadcasts --
+	UPROPERTY(BlueprintAssignable)
+	FOnTransitionToTB OnTransitionToTB;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTransitionToRT OnTransitionToRT;
 	
 	// --- Ability Queue --- 
 	UFUNCTION(BlueprintCallable, Category = "Presage")

@@ -58,21 +58,24 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> InCombatTBContext;
-
-	EInputContext CurrentInputContext = EInputContext::OutOfCombat;
 	
+	EInputContext CurrentInputContext = EInputContext::OutOfCombat;
+
 	void UpdateInputContext(const EInputContext NewInputContext);
 	void AbilityInputTagPressed(const FGameplayTag InputTag);
 	void AbilityInputTagReleased(const FGameplayTag InputTag);
 	void AbilityInputTagHeld(const FGameplayTag InputTag);
 
-	// --- Cursor Trace ---
+	UFUNCTION()
+	void HandleTBTransition(bool bIsEnteringTB);
+
+	/* --- Cursor Trace ---
 	TObjectPtr<AActor> LastActor;
 	TObjectPtr<AActor> ThisActor;
 	FHitResult CursorTraceHit;
 	void CursorTrace();
 	static void HighlightActor(AActor* InActor);
-	static void UnhighlightActor(AActor* InActor);
+	static void UnhighlightActor(AActor* InActor);*/
 
 	// --- Ability System ---
 	UPROPERTY()
