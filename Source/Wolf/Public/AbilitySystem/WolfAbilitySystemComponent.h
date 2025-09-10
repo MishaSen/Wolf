@@ -15,11 +15,18 @@ class WOLF_API UWolfAbilitySystemComponent : public UAbilitySystemComponent
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Abilities")
-	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& AbilitiesToGrant,
-	                           TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle>& OutHandles);
-
 	void AbilityInputTagPressed(const FGameplayTag& Tag);
 	void AbilityInputTagReleased(const FGameplayTag& Tag);
 	void AbilityInputTagHeld(const FGameplayTag& Tag);
+
+protected:
+	// --- UE Prediction Key Stuff ---
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetInputTagPressed(FGameplayTag Tag, FPredictionKey PredictionKey);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetInputTagReleased(FGameplayTag Tag, FPredictionKey PredictionKey);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerSetInputTagHeld(FGameplayTag Tag, FPredictionKey PredictionKey);
 };

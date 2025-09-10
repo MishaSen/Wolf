@@ -81,12 +81,26 @@ void AWolfCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void AWolfCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+	AddCharacterAbilities();
+}
 
-	if (ASC)
+void AWolfCharacter::AddCharacterAbilities()
+{
+	if (!HasAuthority() || !ASC) return;
+
+	GrantedAbilityHandles.Empty(); 
+	for (const auto& Pair : TBAbilities)
 	{
-		if (HasAuthority())
+		const TSubclassOf<UGameplayAbility> AbilityClass = Pair.Key;
+		const FGameplayTag InputTag = Pair.Value;
+		if (AbilityClass)
 		{
-			ASC->AddCharacterAbilities(DefaultAbilities, GrantedAbilityHandles);
+			FGameplayAbilitySpec NewAbilitySpec(AbilityClass, 1, 0);
+			NewAbilitySpec.GetDynamicSpecSourceTags().AddTag(InputTag);
+			if (FGameplayAbilitySpecHandle NewHandle = ASC->GiveAbility(NewAbilitySpec); NewHandle.IsValid())
+			{
+				GrantedAbilityHandles.Add(AbilityClass, NewHandle);
+			}
 		}
 	}
 }

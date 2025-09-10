@@ -9,6 +9,8 @@
 #include "AbilitySystemInterface.h"
 #include "WolfCharacter.generated.h"
 
+class UGameplayAbility;
+
 UCLASS()
 class WOLF_API AWolfCharacter : public ACharacter, public IAbilitySystemInterface
 {
@@ -38,13 +40,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
 	TSubclassOf<UGameplayEffect> DefaultAttributes;
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
+	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
+	TMap<TSubclassOf<UGameplayAbility>, FGameplayTag> TBAbilities;
 
+private:
 	UPROPERTY()
 	UWolfAttributeSet* AtSet;
 
 	UPROPERTY()
 	TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle> GrantedAbilityHandles;
+
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	void AddCharacterAbilities();
 };

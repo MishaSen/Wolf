@@ -3,39 +3,25 @@
 
 #include "Wolf/Public/AbilitySystem/WolfAbilitySystemComponent.h"
 
-void UWolfAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& AbilitiesToGrant,
-                                                        TMap<TSubclassOf<UGameplayAbility>, FGameplayAbilitySpecHandle>&
-                                                        OutHandles)
-{
-	if (!GetOwner()) return;
-	for (auto AbilityClass : AbilitiesToGrant)
-	{
-		FGameplayAbilitySpecHandle NewHandle = GiveAbility(FGameplayAbilitySpec(
-			AbilityClass,
-			1,
-			0,
-			GetOwner()));
-		if (NewHandle.IsValid())
-		{
-			OutHandles.Add(AbilityClass, NewHandle);
-		}
-	}
-}
-
 void UWolfAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Tag)
 {
 	if (!Tag.IsValid()) return;
+
+	const FPredictionKey PredictionKey = FPredictionKey::CreateNewPredictionKey(this);
+	ServerSetInputTagPressed(Tag, PredictionKey);
+	
+	FScopedPredictionWindow ScopedPredictionWindow(this, PredictionKey);
 	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(Tag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(Tag))
 		{
 			AbilitySpecInputPressed(AbilitySpec);
 			if (AbilitySpec.IsActive())
 			{
 				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed,
 				                      AbilitySpec.Handle,
-				                      AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+				                      PredictionKey);
 			}
 		}
 	}
@@ -44,26 +30,37 @@ void UWolfAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Tag
 void UWolfAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& Tag)
 {
 	if (!Tag.IsValid()) return;
+
+	const FPredictionKey PredictionKey = FPredictionKey::CreateNewPredictionKey(this);
+	ServerSetInputTagReleased(Tag, PredictionKey);
+
+	FScopedPredictionWindow ScopedPredictionWindow(this, PredictionKey);
 	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(Tag) && AbilitySpec.IsActive())
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(Tag) && AbilitySpec.IsActive())
 		{
 			AbilitySpecInputReleased(AbilitySpec);
 			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased,
 								  AbilitySpec.Handle,
-								  AbilitySpec.ActivationInfo.GetActivationPredictionKey());
+								  PredictionKey);
 		}
 	}
 }
 
 void UWolfAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& Tag)
 {
+
 	if (!Tag.IsValid()) return;
+
+	const FPredictionKey PredictionKey = FPredictionKey::CreateNewPredictionKey(this);
+	ServerSetInputTagHeld(Tag, PredictionKey);
+
+	FScopedPredictionWindow ScopedPredictionWindow(this, PredictionKey);
 	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.DynamicAbilityTags.HasTagExact(Tag))
+		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(Tag))
 		{
 			AbilitySpecInputPressed(AbilitySpec);
 			if (!AbilitySpec.IsActive())
@@ -73,3 +70,16 @@ void UWolfAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& Tag)
 		}
 	}
 }
+
+// --- Server RPCs --- (Get key from client)
+void UWolfAbilitySystemComponent::ServerSetInputTagPressed_Implementation(FGameplayTag Tag, FPredictionKey PredictionKey) {}
+void UWolfAbilitySystemComponent::ServerSetInputTagReleased_Implementation(FGameplayTag Tag, FPredictionKey PredictionKey) {}
+void UWolfAbilitySystemComponent::ServerSetInputTagHeld_Implementation(FGameplayTag Tag, FPredictionKey PredictionKey) {}
+
+// --- Validation Functions ---
+bool UWolfAbilitySystemComponent::ServerSetInputTagPressed_Validate(FGameplayTag Tag, FPredictionKey PredictionKey) { return true; }
+bool UWolfAbilitySystemComponent::ServerSetInputTagReleased_Validate(FGameplayTag Tag, FPredictionKey PredictionKey) { return true; }
+bool UWolfAbilitySystemComponent::ServerSetInputTagHeld_Validate(FGameplayTag Tag, FPredictionKey PredictionKey) { return true; }
+
+
+
